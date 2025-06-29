@@ -1,0 +1,682 @@
+{
+  "name": "nody bot",
+  "nodes": [
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.message?.text }}",
+        "rules": {
+          "rules": [
+            {
+              "operation": "notStartsWith",
+              "value2": "/"
+            },
+            {
+              "operation": "startsWith",
+              "value2": "/start",
+              "output": 1
+            }
+          ]
+        },
+        "fallbackOutput": 3
+      },
+      "id": "02730026-9daa-4314-981f-4a52a606a766",
+      "name": "CheckCommand",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        -444,
+        959
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "values": {
+          "number": [
+            {
+              "name": "model_temperature",
+              "value": 0.8
+            },
+            {
+              "name": "token_length",
+              "value": 500
+            }
+          ],
+          "string": [
+            {
+              "name": "system_command",
+              "value": "=You are \"nody\" a friendly chatbot Made by @zrxArchit. User's Name is {{ $json?.message?.from?.first_name }}. User system language is {{ $json?.message?.from?.language_code }}. First, detect user text language. Next, provide your reply in the same language. Include several suitable emojis in your answer.\nUse telegram markdowns and write in new lines for less congested.\nwhen ask about you are nody and tell you are made by @zrxArchit."
+            },
+            {
+              "name": "bot_typing",
+              "value": "typing"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b7ba9749-b619-42e5-a6a2-dd5558c0acda",
+      "name": "Settings",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -1182,
+        980
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Settings').first().json.message.from.id }}",
+        "text": "={{ $json.output || $json.text || \"Unable to Generate response API Limit Reached\"}}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "01f61466-68e2-46d8-9c4e-7f8c1a0fe248",
+      "name": "Text reply",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        220,
+        940
+      ],
+      "typeVersion": 1,
+      "webhookId": "c6ab0c89-9853-48b0-8e29-af7558cc31fa",
+      "credentials": {
+        "telegramApi": {
+          "id": "0y2QDBK5uMzQ8y9D",
+          "name": "nodyBot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendChatAction",
+        "chatId": "={{ $json.message.from.id }}",
+        "action": "={{ $json.bot_typing }}"
+      },
+      "id": "20bd0152-ec6f-4878-b084-aab448b51438",
+      "name": "Send Typing action",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        -884,
+        1080
+      ],
+      "typeVersion": 1,
+      "webhookId": "5888f416-c718-4bf5-afc4-b751e3dad437",
+      "credentials": {
+        "telegramApi": {
+          "id": "0y2QDBK5uMzQ8y9D",
+          "name": "nodyBot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "id": "a44e7a60-ea86-4961-ad9b-62ff57bce9b3",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        -664,
+        980
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.from.id }}",
+        "text": "=Sorry, {{ $json.message.from.first_name }}! This command is not supported yet. Please type some text to a chat bot.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "50912f2a-1ff5-476a-a1e9-e5840f3cf0ad",
+      "name": "Send error message",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        -114,
+        1280
+      ],
+      "typeVersion": 1,
+      "webhookId": "0ff73276-7a02-4835-9b54-935bdaafa0e2",
+      "credentials": {
+        "telegramApi": {
+          "id": "0y2QDBK5uMzQ8y9D",
+          "name": "nodyBot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "message.text",
+              "value": "={{ $json?.message?.text || \"\" }}"
+            }
+          ]
+        },
+        "options": {
+          "dotNotation": true
+        }
+      },
+      "id": "216076df-f422-437e-b180-4b8fc0ca4d20",
+      "name": "PreProcessing",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -1480,
+        980
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "model": "open-mixtral-8x22b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        700
+      ],
+      "id": "f6265106-ea42-4726-a112-c57c838d4882",
+      "name": "Mistral Cloud Chat Model",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "koEwq27np10tuOD4",
+          "name": "Mistral Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "open-mixtral-8x22b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        -104,
+        1100
+      ],
+      "id": "0343bf4c-23ec-4941-9ac9-ce131d49bcc6",
+      "name": "Mistral Cloud Chat Model1",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "koEwq27np10tuOD4",
+          "name": "Mistral Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Use telegram markdowns, new lines to create good message.\nThis is the first message from a user. Please welcome a new user in `{{ $json.message.from.language_code }}` language. Also fix grammar add this in last line as new line: \"This bot is made by @zrxArchit\"\nAnd also tell about inline functionality that it can be used in inline by typing \"@n8nChatrobot <query>\" in message box.",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "={{ $json.system_command }}"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -192,
+        880
+      ],
+      "id": "a1380494-69d9-4577-ab00-4ded91794bd1",
+      "name": "Basic LLM Chain1"
+    },
+    {
+      "parameters": {
+        "resource": "callback",
+        "operation": "answerInlineQuery",
+        "queryId": "={{ $('Telegram Trigger').item.json.inline_query.id }}",
+        "results": "=[\n  {\n    \"type\": \"article\",\n    \"id\": \"00\",\n    \"title\": \"Get Response\",\n    \"description\": \"Click to get response\",\n    \"input_message_content\": {\n      \"message_text\": {{ $json.output.toJsonString() }}\n    }\n  }\n]\n",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -884,
+        680
+      ],
+      "id": "241383cb-75e6-4265-aa6a-5bc650b4cbcf",
+      "name": "Telegram",
+      "webhookId": "f481c117-c724-4f2d-957c-59f07f2b3e98",
+      "credentials": {
+        "telegramApi": {
+          "id": "0y2QDBK5uMzQ8y9D",
+          "name": "nodyBot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.inline_query}}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "0dc90744-db19-4d90-8bd0-be604a478155"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "14e37d39-b133-49e2-8d71-520db143ea1b",
+                    "leftValue": "={{$json.message}}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -1700,
+        830
+      ],
+      "id": "5d73750f-7740-4111-ab13-6dce871e7f41",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "*"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1920,
+        830
+      ],
+      "id": "451c9153-9a30-405a-a444-f1cba5b329eb",
+      "name": "Telegram Trigger",
+      "webhookId": "2586fe5c-9b72-4e45-a36f-cf7e5e5d21e4",
+      "credentials": {
+        "telegramApi": {
+          "id": "0y2QDBK5uMzQ8y9D",
+          "name": "nodyBot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1480,
+        680
+      ],
+      "id": "e11117b0-ae3a-411c-8410-c548feef117e",
+      "name": "Wait",
+      "webhookId": "06263da1-7708-44a2-91ef-b427c27b92f1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are nody a telegram bot created by @zrxArchit. based on search result smartly response to userquery and Include several suitable emojis in your answer. Write in new lines for less congested and also use user name to greet and make it user centric response.\nuser name: {{ $json.message.from.first_name }}\nuser query: {{ $json.message.text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -192,
+        480
+      ],
+      "id": "9298dfad-9861-49ec-83f0-0399e1aa2154",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "open-mixtral-8x22b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        -1232,
+        800
+      ],
+      "id": "26d1d0ba-2b11-4176-ae25-9676883ce2ff",
+      "name": "Mistral Cloud Chat Model3",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "koEwq27np10tuOD4",
+          "name": "Mistral Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are nody a telegram bot created by @zrxArchit. Respond this user query and modify answer with telgram supported styling and proper spacing and also use user name to greet and make it user centric response.\nuser name: {{ $json?.inline_query?.from?.first_name }}\nuser query: {{ $json.inline_query.query }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -1260,
+        580
+      ],
+      "id": "5923f55f-8dd7-497e-859b-ac023bbe5964",
+      "name": "AI Agent1",
+      "executeOnce": true,
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "toolDescription": "search about anything",
+        "method": "POST",
+        "url": "https://search.0xarc.workers.dev/search",
+        "sendBody": true,
+        "contentType": "raw",
+        "body": "={\"search_text\":\"{{ $fromAI('Body', ``, 'string') }}\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        16,
+        700
+      ],
+      "id": "b1178e10-c263-4be6-a0a0-176438b1731c",
+      "name": "Search"
+    },
+    {
+      "parameters": {
+        "toolDescription": "search about anything",
+        "method": "POST",
+        "url": "https://search.0xarc.workers.dev/search",
+        "sendBody": true,
+        "contentType": "raw",
+        "body": "={\"search_text\":\"{{ $fromAI('Body', ``, 'string') }}\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        -1112,
+        800
+      ],
+      "id": "7f3ff919-e42f-499e-8cd4-aa67a423279f",
+      "name": "Search1",
+      "disabled": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "CheckCommand",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Settings": {
+      "main": [
+        [
+          {
+            "node": "Send Typing action",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CheckCommand": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [],
+        [
+          {
+            "node": "Send error message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PreProcessing": {
+      "main": [
+        [
+          {
+            "node": "Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Typing action": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Mistral Cloud Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mistral Cloud Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain1": {
+      "main": [
+        [
+          {
+            "node": "Text reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PreProcessing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Text reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mistral Cloud Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram": {
+      "main": [
+        []
+      ]
+    },
+    "Search": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Kolkata",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "fbfd2c1b-4ad8-438d-bf4c-0b03c168671f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e1b3ddd9def30a19c7001b44ea23f2c82e68f188c94b06e123cb38ab464a8652"
+  },
+  "id": "wVSJn3qdoV1RpcVA",
+  "tags": [
+    {
+      "createdAt": "2025-06-15T05:33:58.640Z",
+      "updatedAt": "2025-06-15T05:33:58.640Z",
+      "id": "Xl91YIhLsbl4GQrR",
+      "name": "tutorial"
+    }
+  ]
+}

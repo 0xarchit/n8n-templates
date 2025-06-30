@@ -2,6 +2,8 @@
 
 A collection of my personal n8n workflow templates that I've created and use regularly. These templates are designed to help automate various tasks and integrate different services.
 
+> If you use or like anything in this repo then Give this repo a star please 🌟
+
 ## 📋 About
 
 This repository contains various n8n workflow templates that I've developed for different automation needs. Templates are added as I create and test them.
